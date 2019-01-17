@@ -6,6 +6,11 @@ var xhr = new XMLHttpRequest();
 var items = [];
 var itemsArr = [];
 var img_holder;
+var star = document.getElementsByTagName('i');
+var idArr = [];
+var clone;
+var markArr = [];
+
 // Setup our listener to process completed requests
 xhr.onload = function () {
     var myObj , itemContainer = "";
@@ -18,11 +23,10 @@ xhr.onload = function () {
         for (var x in items) {
             var urlForImg = items[x].thumbnail.path + "." + items[x].thumbnail.extension;
             var name = items[x].name;
-            itemContainer += "<div class='imgHolder'><img class='sliderImg' src="+ urlForImg +"><div>" + name + "</div></div>";
-            // console.log(itemsArr[x].replace(/\./g,' '));
-
+            var id = items[x].id;
+            idArr.push(items[x].id);
+            itemContainer += "<div class='imgHolder'><img class='sliderImg' src="+ urlForImg +"><i id=" + id + " class='far fa-star'></i><div>" + name + "</div></div>";
             itemsArr.push(items[x].name.replace(/\./g,' ').replace(/\s/g, ""));
-
         }
         document.getElementById("itemHolder").innerHTML = itemContainer;
 
@@ -51,6 +55,16 @@ search.addEventListener("keyup", function () {
     }
 });
 
+function deleteClone(clicked_id) {
+    for (let c = 0; c < idArr.length; c++ ){
+      if(idArr[c] = markArr[c]){
+          var duplicate = document.getElementById(clicked_id).parentNode;
+          // console.log(markArr);
+          duplicate.remove();
+      }
+    }
+}
+
 //Function for filter hero
 function filterHero() {
     var searchInput = document.getElementById('search').value.toUpperCase().replace(/\s/g, "");
@@ -63,6 +77,20 @@ function filterHero() {
             img_holder[i].style.display = 'none';
         }
     }
+    for ( let w=0; w<itemsArr.length; w++){
+        star[w].addEventListener('click' , function () {
+            var itm = star[w].parentElement;
+            clone = itm.cloneNode(true);
+            if (this.style.color === 'yellow'){
+                this.style.color = 'black';
+                deleteClone(this.id);
+            }else{
+                this.style.color = 'yellow';
+                document.getElementById('bookmarkList').appendChild(clone);
+                markArr.push(this.id);
+            }
+        });
+    }
 }
 
 //Focus on input when page is load
@@ -70,7 +98,11 @@ search.focus();
 
 //Function for delete hero when search input is empty
 function updateGrid() {
-    for (var i = 0; i < itemsArr.length; i++){
+    for (let i = 0; i < itemsArr.length; i++){
         img_holder[i].style.display = 'none';
     }
 }
+
+
+
+
