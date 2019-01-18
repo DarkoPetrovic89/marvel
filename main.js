@@ -8,8 +8,7 @@ var itemsArr = [];
 var img_holder;
 var star = document.getElementsByTagName('i');
 var idArr = [];
-var clone;
-var markArr = [];
+var cloneArr = [];
 
 // Setup our listener to process completed requests
 xhr.onload = function () {
@@ -55,22 +54,13 @@ search.addEventListener("keyup", function () {
     }
 });
 
-function deleteClone(clicked_id) {
-    for (let c = 0; c < idArr.length; c++ ){
-      if(idArr[c] = markArr[c]){
-          var duplicate = document.getElementById(clicked_id).parentNode;
-          // console.log(markArr);
-          duplicate.remove();
-      }
-    }
-}
-
 //Function for filter hero
 function filterHero() {
     var searchInput = document.getElementById('search').value.toUpperCase().replace(/\s/g, "");
     for (var i = 0; i < itemsArr.length; i++){
         var a = itemsArr[i];
-        img_holder = document.querySelectorAll('.imgHolder');
+        img_holder = document.querySelectorAll('.imgHolder'),
+        bookmarkList = document.getElementById('bookmarkList');
         if (a.toUpperCase().indexOf(searchInput) > -1){
             img_holder[i].style.display = 'inline-block';
         }else {
@@ -80,18 +70,36 @@ function filterHero() {
     for ( let w=0; w<itemsArr.length; w++){
         star[w].addEventListener('click' , function () {
             var itm = star[w].parentElement;
-            clone = itm.cloneNode(true);
+            var clone = itm.cloneNode(true),
+            bookmarkList = document.getElementById('bookmarkList');
+            var starId = star[w].id;
+            clone.setAttribute('data-id' , starId);
             if (this.style.color === 'yellow'){
                 this.style.color = 'black';
-                deleteClone(this.id);
+                bookmarkList.querySelector("[data-id='" + starId + "']").remove();
             }else{
                 this.style.color = 'yellow';
                 document.getElementById('bookmarkList').appendChild(clone);
-                markArr.push(this.id);
-            }
+                var cloneString = clone.outerHTML;
+                cloneArr.push(cloneString);
+                localStorage.setItem('cloneArr' , cloneArr);
+            };
+
         });
     }
+
 }
+
+//Save data in local storage
+
+window.onload = function () {
+    if (localStorage.getItem("cloneArr") !== null) {
+        var storedItems = localStorage.getItem('cloneArr');
+        document.getElementById('bookmarkListHistory').insertAdjacentHTML( 'beforeend', storedItems );
+    }
+};
+
+
 
 //Focus on input when page is load
 search.focus();
