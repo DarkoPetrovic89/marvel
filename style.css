@@ -58,3 +58,11 @@ button {
   right: 80px;
   display: none;
 }
+.rest {
+  display: none!important;
+}
+.showMore {
+  display: block;
+  float: none;
+  margin: 0 auto;
+}
