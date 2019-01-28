@@ -19,9 +19,11 @@ var starId;
 var numbers = [];
 var searchArr = [];
 var x;
-var itemsPerPage = 12;
+var itemsPerPage = 10;
+var page_number =  1;
 var searchInput;
-
+var restArr = [];
+var checkedItems;
 // Setup our listener to process completed requests
 xhr.onload = function () {
     var myObj , itemContainer = "";
@@ -68,6 +70,7 @@ search.addEventListener("keyup", function () {
 
 //Function for filter hero
 function filterHero() {
+    checkedItems = 0;
     checkBookmarkStar();
     searchInput = document.getElementById('search').value.toUpperCase().replace(/\s/g, "");
     for (var i = 0; i < itemsArr.length; i++){
@@ -76,8 +79,12 @@ function filterHero() {
         if (a.toUpperCase().indexOf(searchInput) > -1){
             img_holder[i].style.display = 'inline-block';
             img_holder[i].classList.add('checked');
-            if (i > itemsPerPage){
-                img_holder[i].classList.add('rest');
+            checkedItems = null;
+            checkedItems = document.querySelectorAll('.checked').length;
+            if (checkedItems > itemsPerPage){
+                for (let m = itemsPerPage; m<checkedItems; m++){
+                    img_holder[m].classList.add('rest');
+                }
             }
         }else {
             img_holder[i].style.display = 'none';
@@ -87,7 +94,7 @@ function filterHero() {
     searchResult();
     paginateArr();
     showMore();
-    // onChange();
+    itemForPagination();
     for ( let w=0; w<itemsArr.length; w++){
         star[w].addEventListener('click' , function () {
             starId = star[w].id;
@@ -101,7 +108,6 @@ function filterHero() {
             }
         });
     }
-
 }
 
 //Save data in local storage
@@ -169,8 +175,7 @@ function searchResult() {
     }
 }
 function paginateArr() {
-    x = paginate(searchArr, 12 , 1);
-
+    x = paginate(searchArr, itemsPerPage , page_number);
     function paginate (array, page_size, page_number) {
         --page_number; // because pages logically start with 1, but technically with 0
         return array.slice(page_number * page_size, (page_number + 1) * page_size);
@@ -186,26 +191,44 @@ function showMore() {
         btn.appendChild(text);
         document.getElementById('itemHolder').appendChild(btn);
         this.addEventListener('click' , function () {
-            for(let i = 0; i<searchArr.length; i++){
-                img_holder[i].classList.remove('rest');
+            for(let b = 0; b<searchArr.length; b++){
+                img_holder[b].classList.remove('rest');
             }
+            setTimeout(checkIfYouNeedMore , 100);
         })
     }
 }
 
 
 document.getElementById('search').oninput = function () {
-    if(document.querySelector('.showMore') !== null){
+    setTimeout(removeShowMore , 100);
+    searchInput = '';
+    checkedItems = null;
+};
+
+function removeShowMore() {
+    if(searchInput == "" && document.querySelector('.showMore') !== null){
         document.querySelector('.showMore').remove()
     }
     if(searchArr.length < itemsPerPage && document.querySelector('.showMore') !== null){
         document.querySelector('.showMore').remove()
     }
+}
 
-};
+function itemForPagination() {
+    restArr = [];
+    for(var a=0; a<document.querySelectorAll('.rest').length; a++){
+        restArr.push(document.querySelectorAll('.rest')[a])
+    }
+}
 
-// document.getElementsByClassName('showMore').addEventListener('click' , function () {
-//         alert(event.target)
-// });
+function checkIfYouNeedMore() {
+    itemForPagination();
+    if (restArr.length == 0 && document.querySelector('.showMore') !== null){
+        document.querySelector('.showMore').remove()
+    }
+}
+
+
 
 
