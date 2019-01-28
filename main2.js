@@ -63,6 +63,7 @@ search.addEventListener("keyup", function () {
         filterHero();
     } else if(search.value == ""){
         updateGrid();
+        unchecked();
     }else {
 
     }
@@ -70,7 +71,6 @@ search.addEventListener("keyup", function () {
 
 //Function for filter hero
 function filterHero() {
-    checkedItems = 0;
     checkBookmarkStar();
     searchInput = document.getElementById('search').value.toUpperCase().replace(/\s/g, "");
     for (var i = 0; i < itemsArr.length; i++){
@@ -79,7 +79,6 @@ function filterHero() {
         if (a.toUpperCase().indexOf(searchInput) > -1){
             img_holder[i].style.display = 'inline-block';
             img_holder[i].classList.add('checked');
-            checkedItems = null;
             checkedItems = document.querySelectorAll('.checked').length;
             if (checkedItems > itemsPerPage){
                 for (let m = itemsPerPage; m<checkedItems; m++){
@@ -158,7 +157,7 @@ search.focus();
 
 //Function for delete hero when search input is empty
 function updateGrid() {
-    for (var i = 0; i < itemsArr.length; i++){
+    for (let i = 0; i < itemsArr.length; i++){
         img_holder[i].style.display = 'none';
     }
 }
@@ -203,7 +202,6 @@ function showMore() {
 document.getElementById('search').oninput = function () {
     setTimeout(removeShowMore , 100);
     searchInput = '';
-    checkedItems = null;
 };
 
 function removeShowMore() {
@@ -229,6 +227,13 @@ function checkIfYouNeedMore() {
     }
 }
 
+function unchecked() {
+    console.log('tu je')
+    for(let o = 0; o<itemsArr.length; o++){
+        img_holder[o].classList.remove('checked');
+        img_holder[o].classList.remove('rest');
+    }
+}
 
 
 
