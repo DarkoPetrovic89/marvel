@@ -6,24 +6,17 @@
  */
 var xhr = new XMLHttpRequest();
 
-var heroes = [];
 var itemsArr = [];
 var img_holder;
 var star = document.getElementsByTagName('i');
-var idArr = [];
 var historyArr = [];
-var selectedStar;
-var arrayFromLS = [];
-var arrayItemFromLS;
 var starId;
 var numbers = [];
 var searchArr = [];
-var x;
 var itemsPerPage = 10;
-var page_number =  1;
 var searchInput;
 var restArr = [];
-var checkedItems;
+var myFunc;
 // Setup our listener to process completed requests
 xhr.onload = function () {
     var myObj , itemContainer = "";
@@ -31,13 +24,12 @@ xhr.onload = function () {
     if (xhr.status >= 200 && xhr.status < 300) {
         // What do when the request is successful
         myObj = JSON.parse(this.responseText);
-        heroes = myObj.data.results;
+        var heroes = myObj.data.results;
 
         for (var x in heroes) {
             var urlForImg = heroes[x].thumbnail.path + "." + heroes[x].thumbnail.extension;
             var name = heroes[x].name;
             var id = heroes[x].id;
-            idArr.push(heroes[x].id);
             itemContainer += "<div class='imgHolder'><img class='sliderImg' src="+ urlForImg +"><i id=" + id + " class='far fa-star'></i><div>" + name + "</div></div>";
             itemsArr.push(heroes[x].name.replace(/\./g,' ').replace(/\s/g, ""));
         }
@@ -58,14 +50,19 @@ xhr.send();
 
 
 var search = document.getElementById("search");
+var searchCount = 0;
 search.addEventListener("keyup", function () {
     if (search.value) {
-        filterHero();
+        searchCount++;
+    // if(searchCount >= 1){
+    //     for (var c=0; c<itemsArr.length; c++){
+    //         star[c].removeEventListener('click' , myFunc , false);
+    //     }
+    // }
+    filterHero();
     } else if(search.value == ""){
         updateGrid();
-        unchecked();
-    }else {
-
+        searchCount = 0;
     }
 });
 
@@ -73,39 +70,46 @@ search.addEventListener("keyup", function () {
 function filterHero() {
     checkBookmarkStar();
     searchInput = document.getElementById('search').value.toUpperCase().replace(/\s/g, "");
-    for (var i = 0; i < itemsArr.length; i++){
-        var a = itemsArr[i];
-        img_holder = document.querySelectorAll('.imgHolder');
-        if (a.toUpperCase().indexOf(searchInput) > -1){
-            img_holder[i].style.display = 'inline-block';
-            img_holder[i].classList.add('checked');
-            checkedItems = document.querySelectorAll('.checked').length;
-            if (checkedItems > itemsPerPage){
-                for (let m = itemsPerPage; m<checkedItems; m++){
-                    img_holder[m].classList.add('rest');
+    if (searchInput){
+        for (var i = 0; i < itemsArr.length; i++){
+            var a = itemsArr[i];
+            img_holder = document.querySelectorAll('.imgHolder');
+            if (a.toUpperCase().indexOf(searchInput) > -1){
+                img_holder[i].classList.remove('hide');
+                img_holder[i].classList.add('show');
+                img_holder[i].classList.add('checked');
+                searchResult();
+                if(searchArr.length > itemsPerPage){
+                    img_holder[i].classList.remove('show');
+                    img_holder[i].classList.add('rest');
                 }
+            }else {
+                img_holder[i].classList.remove('show');
+                img_holder[i].classList.add('hide');
+                img_holder[i].classList.remove('checked');
             }
-        }else {
-            img_holder[i].style.display = 'none';
-            img_holder[i].classList.remove('checked');
+
         }
     }
-    searchResult();
     paginateArr();
     showMore();
     itemForPagination();
+
     for ( let w=0; w<itemsArr.length; w++){
-        star[w].addEventListener('click' , function () {
+        myFunc = function (e) {
             starId = star[w].id;
-            if(this.style.color === 'yellow'){
-                this.style.color = 'black';
+            if(this.classList.contains('checkMark')){
+                this.classList.remove('checkMark');
                 deleteFunction();
             }else{
-                this.style.color = 'yellow';
+                this.classList.add('checkMark');
                 numbers.push(starId);
                 localStorage.setItem('historyArr' , numbers);
             }
-        });
+            e.preventDefault();
+        };
+        star[w].removeEventListener('click' , myFunc , false);
+        star[w].addEventListener('click' , myFunc);
     }
 }
 
@@ -126,11 +130,11 @@ function checkBookmarkStar() {
     if (localStorage.getItem('historyArr') !== null){
         var storedId = localStorage.getItem('historyArr');
         historyArr.push(storedId);
-        arrayFromLS = JSON.parse("[" + historyArr + "]");
+        var arrayFromLS = JSON.parse("[" + historyArr + "]");
         for (var r=0; r<arrayFromLS.length; r++){
-            arrayItemFromLS = arrayFromLS[r];
-            selectedStar = document.querySelector("[id='" + arrayItemFromLS + "']");
-            selectedStar.style.color = 'yellow';
+           var arrayItemFromLS = arrayFromLS[r];
+            var selectedStar = document.querySelector("[id='" + arrayItemFromLS + "']");
+            selectedStar.classList.add('checkMark');
         }
     }
 
@@ -143,7 +147,7 @@ function deleteFunction() {
     numbers = starInLSarray.map(function (a) {
         return a.toString();
     });
-    for (let r=0; r<starInLSarray.length; r++){
+    for (var r=0; r<starInLSarray.length; r++){
         var arrayItemFromStarLS = starInLSarray[r];
         if (starId.indexOf(arrayItemFromStarLS) !== -1) {
             numbers.splice(r, 1);
@@ -157,8 +161,9 @@ search.focus();
 
 //Function for delete hero when search input is empty
 function updateGrid() {
-    for (let i = 0; i < itemsArr.length; i++){
-        img_holder[i].style.display = 'none';
+    for (var k = 0; k < itemsArr.length; k++){
+        img_holder[k].classList.remove('show');
+        img_holder[k].classList.add('hide');
     }
 }
 
@@ -174,7 +179,8 @@ function searchResult() {
     }
 }
 function paginateArr() {
-    x = paginate(searchArr, itemsPerPage , page_number);
+    var page_number =  1;
+    const z = paginate(searchArr, itemsPerPage , page_number);
     function paginate (array, page_size, page_number) {
         --page_number; // because pages logically start with 1, but technically with 0
         return array.slice(page_number * page_size, (page_number + 1) * page_size);
@@ -189,19 +195,28 @@ function showMore() {
     if (searchArr.length > itemsPerPage){
         btn.appendChild(text);
         document.getElementById('itemHolder').appendChild(btn);
-        this.addEventListener('click' , function () {
-            for(let b = 0; b<searchArr.length; b++){
+        document.querySelector('.showMore').addEventListener('click' , function () {
+            for(var b = 0; b<searchArr.length; b++){
                 img_holder[b].classList.remove('rest');
+                img_holder[b].classList.add('show');
             }
             setTimeout(checkIfYouNeedMore , 100);
         })
     }
 }
 
-
+var count = 0;
 document.getElementById('search').oninput = function () {
+    count++;
     setTimeout(removeShowMore , 100);
     searchInput = '';
+    if(count > 1){
+        unchecked();
+        for ( let q=0; q<itemsArr.length; q++) {
+            star[q].removeEventListener('click', myFunc);
+        }
+    }
+    itemForPagination();
 };
 
 function removeShowMore() {
@@ -228,8 +243,7 @@ function checkIfYouNeedMore() {
 }
 
 function unchecked() {
-    console.log('tu je')
-    for(let o = 0; o<itemsArr.length; o++){
+    for(var o = 0; o<itemsArr.length; o++){
         img_holder[o].classList.remove('checked');
         img_holder[o].classList.remove('rest');
     }
