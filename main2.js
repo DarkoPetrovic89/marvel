@@ -17,6 +17,8 @@ var itemsPerPage = 10;
 var searchInput;
 var restArr = [];
 var myFunc;
+var searchCount;
+
 // Setup our listener to process completed requests
 xhr.onload = function () {
     var myObj , itemContainer = "";
@@ -50,19 +52,13 @@ xhr.send();
 
 
 var search = document.getElementById("search");
-var searchCount = 0;
+searchCount = 0;
 search.addEventListener("keyup", function () {
     if (search.value) {
         searchCount++;
-    // if(searchCount >= 1){
-    //     for (var c=0; c<itemsArr.length; c++){
-    //         star[c].removeEventListener('click' , myFunc , false);
-    //     }
-    // }
     filterHero();
     } else if(search.value == ""){
         updateGrid();
-        searchCount = 0;
     }
 });
 
@@ -107,23 +103,39 @@ function filterHero() {
                 localStorage.setItem('historyArr' , numbers);
             }
             e.preventDefault();
+            deleteComma();
         };
         star[w].removeEventListener('click' , myFunc , false);
-        star[w].addEventListener('click' , myFunc);
+        if(searchCount == 1){
+            star[w].addEventListener('click' , myFunc);
+        }
+
     }
+
 }
 
-//Save data in local storage
+
+// //Save data in local storage
 window.onload = function () {
+   deleteComma();
+};
+
+
+function deleteComma() {
+    console.log('tu je');
     if (localStorage.getItem("historyArr") !== null) {
         var removeComma = localStorage.getItem('historyArr');
         while(removeComma.charAt(0) === ','){
             removeComma = removeComma.substr(1);
         }
+        while(removeComma.slice(-1) === ','){
+            removeComma = removeComma.substr(0, removeComma.length -1);
+        }
         localStorage.setItem('historyArr' , removeComma);
         numbers = JSON.parse("[" + removeComma + "]");
     }
-};
+}
+
 
 //Marked stars after reload
 function checkBookmarkStar() {
@@ -212,9 +224,6 @@ document.getElementById('search').oninput = function () {
     searchInput = '';
     if(count > 1){
         unchecked();
-        for ( let q=0; q<itemsArr.length; q++) {
-            star[q].removeEventListener('click', myFunc);
-        }
     }
     itemForPagination();
 };
@@ -248,6 +257,4 @@ function unchecked() {
         img_holder[o].classList.remove('rest');
     }
 }
-
-
 
